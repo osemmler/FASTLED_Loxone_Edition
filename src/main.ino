@@ -211,7 +211,7 @@ IotWebConfParameter ipAddressParam = IotWebConfParameter("IP address", "ipAddres
 IotWebConfParameter gatewayParam = IotWebConfParameter("Gateway", "gateway", gatewayValue, STRING_LEN, "text", "192.168.3.1", "192.168.3.0");
 IotWebConfParameter netmaskParam = IotWebConfParameter("Subnet mask", "netmask", netmaskValue, STRING_LEN, "text", "255.255.255.0", "255.255.255.0");
 
-IotWebConfParameter stripeTypeParam = IotWebConfParameter("Stripe type (0=SK6812 / 1=WS2812 / 2=WS2801) [The device must be restarted!]", "stripeTypeParam", stripeTypeParamValue, NUMBER_LEN, "number", "0", NULL, "min='0' max='2' step='1'");
+IotWebConfParameter stripeTypeParam = IotWebConfParameter("Stripe type (0=SK6812 / 1=WS2812 / 2=WS2801 / 3=P9813) [The device must be restarted!]", "stripeTypeParam", stripeTypeParamValue, NUMBER_LEN, "number", "0", NULL, "min='0' max='3' step='1'");
 
 IotWebConfSeparator separator1 = IotWebConfSeparator("Network Settings");
 IotWebConfParameter intParam = IotWebConfParameter("Number of LEDs", "intParam", intParamValue, NUMBER_LEN, "number", "300", NULL, "min='1' max='2000' step='1'");
@@ -421,6 +421,8 @@ void handleRoot()
     s += "<td>WS2812 (1)</td>";
   } else if (stripeType == 2) {
     s += "<td>WS2801 (2)</td>";
+  } else if (stripeType == 3) {
+    s += "<td>P9813 (3)</td>";
   } else {
     s += "<td>UNKNOWN (";
     s += stripeType;
@@ -520,6 +522,8 @@ void handleRoot()
     s += "<li>Stripe type: WS2812 (1)";
   } else if (stripeType == 2) {
     s += "<li>Stripe type: WS2801 (2)";
+  } else if (stripeType == 3) {
+    s += "<li>Stripe type: P9813 (3)";
   } else {
     s += "<li>Stripe type: UNKNOWN (";
     s += stripeType;
@@ -914,6 +918,9 @@ void setup()
   } else if (stripeType == 2) { // WS2801
     FastLED.addLeds<WS2801, LED_PIN, CLOCK_PIN, RGB>(leds, atoi(intParamValue));
     Serial.println("Use WS2801 (2)");
+  } else if (stripeType == 3) { // P9813
+    FastLED.addLeds<P9813, LED_PIN, CLOCK_PIN, RGB>(leds, atoi(intParamValue));
+    Serial.println("Use P9813 (3)");
   } else {
     Serial.println("wrong stripe type?");
   }
@@ -1347,7 +1354,18 @@ void loop()
     }
   }
 
-  FastLED.show();
+  int stripeType = atoi(stripeTypeParamValue);
+  if (stripeType == 3)
+  {
+    EVERY_N_MILLISECONDS(100)
+    {
+      FastLED.show();
+    }
+  }
+  else
+  {
+    FastLED.show();
+  }
 
   EVERY_N_MILLISECONDS(20)
   {
